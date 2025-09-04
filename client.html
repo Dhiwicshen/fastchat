@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>FastAPI WebSocket Chat</title>
+</head>
+<body>
+    <h2>FastAPI WebSocket Chat</h2>
+
+    <div id="messages" style="border:1px solid #ccc; height:200px; overflow:auto; padding:5px; margin-bottom:10px;">
+        <div><i>Messages will appear here...</i></div>
+    </div>
+
+    <input type="text" id="messageInput" placeholder="Type a message..." />
+    <button id="sendBtn">Send</button>
+
+    <script>
+        // Connect to FastAPI WebSocket server
+        const ws = new WebSocket("ws://127.0.0.1:8000/ws/chat");
+
+        const messagesDiv = document.getElementById("messages");
+        const input = document.getElementById("messageInput");
+        const sendBtn = document.getElementById("sendBtn");
+
+        ws.onopen = () => {
+            console.log("✅ Connected to server");
+            messagesDiv.innerHTML += `<div><b>Connected to server</b></div>`;
+        };
+
+        ws.onmessage = (event) => {
+            messagesDiv.innerHTML += `<div>${event.data}</div>`;
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        };
+
+        ws.onclose = () => {
+            console.log("❌ Disconnected from server");
+            messagesDiv.innerHTML += `<div><b>Disconnected</b></div>`;
+        };
+
+        // Send button click
+        sendBtn.onclick = () => {
+            const message = input.value.trim();
+            if (message) {
+                ws.send(message);
+                messagesDiv.innerHTML += `<div><b>You:</b> ${message}</div>`;
+                input.value = "";
+            }
+        };
+
+        // Also allow pressing Enter to send
+        input.addEventListener("keypress", function (e) {
+            if (e.key === "Enter") {
+                sendBtn.click();
+            }
+        });
+    </script>
+</body>
+</html>
